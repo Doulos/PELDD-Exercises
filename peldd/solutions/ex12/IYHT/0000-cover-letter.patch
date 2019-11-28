@@ -1,0 +1,38 @@
+From 7b60b539e7102e4be4e81c07e7eeeda89bc9571f Mon Sep 17 00:00:00 2001
+From: Kieran Bingham <kbingham@kernel.org>
+Date: Thu, 28 Nov 2019 10:12:36 +0000
+Subject: [PATCH 0/3] drivers/auxdisplay: Provide support for JHD1313
+
+The JHD1313 is a 16x2 LCD controller with an I2C interface. It is used in the
+Seeed RGB Backlight LCD [0] which has the LCD at the I2C address 0x3e. (A
+PCA9633 is also available at 0x62, to control the RGB backlight)
+
+This series introduces a new Vendor prefix for JHD, and introduces bindings for
+the LCD controller. A driver for the JHD1313 is added to the auxdisplay
+subsystem providing a charlcd to control the display.
+
+[0] http://wiki.seeedstudio.com/Grove-LCD_RGB_Backlight/
+
+Because this interface is quite common, and generic - this could be potentially
+extended to other similar devices later, possibly with optional bindings to
+configure the display width and height. If so - perhaps a more generic naming
+for the binding/driver might be appropriate at that time.
+
+Kieran Bingham (3):
+  dt-bindings: vendor: Add JHD LCD vendor
+  dt-bindings: auxdisplay: Add JHD1313 bindings
+  drivers: auxdisplay: Add JHD1313 I2C interface driver
+
+ .../bindings/auxdisplay/jhd,jhd1313.yaml      |  33 ++++++
+ .../devicetree/bindings/vendor-prefixes.yaml  |   2 +
+ MAINTAINERS                                   |   4 +
+ drivers/auxdisplay/Kconfig                    |  12 ++
+ drivers/auxdisplay/Makefile                   |   1 +
+ drivers/auxdisplay/jhd1313.c                  | 111 ++++++++++++++++++
+ 6 files changed, 163 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/auxdisplay/jhd,jhd1313.yaml
+ create mode 100644 drivers/auxdisplay/jhd1313.c
+
+-- 
+2.20.1
+

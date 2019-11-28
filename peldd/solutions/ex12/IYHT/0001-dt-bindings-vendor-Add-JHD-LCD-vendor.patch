@@ -1,0 +1,29 @@
+From 9ff122a70b4eab69708d920c2f6d8a383a632b31 Mon Sep 17 00:00:00 2001
+From: Kieran Bingham <kbingham@kernel.org>
+Date: Mon, 4 Nov 2019 13:56:56 +0000
+Subject: [PATCH 1/3] dt-bindings: vendor: Add JHD LCD vendor
+
+Jing Handa Electronics is an LCD manufacturer based in Shenzhen, China.
+ http://www.jhdlcd.com.cn/Company.html
+
+Signed-off-by: Kieran Bingham <kbingham@kernel.org>
+---
+ Documentation/devicetree/bindings/vendor-prefixes.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+index 05b3904a995b..5c671263a1f0 100644
+--- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
++++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+@@ -473,6 +473,8 @@ patternProperties:
+     description: JEDEC Solid State Technology Association
+   "^jesurun,.*":
+     description: Shenzhen Jesurun Electronics Business Dept.
++  "^jhd,.*":
++    description: Jing Handa Electronics
+   "^jianda,.*":
+     description: Jiandangjing Technology Co., Ltd.
+   "^karo,.*":
+-- 
+2.20.1
+

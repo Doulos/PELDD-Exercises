@@ -1,0 +1,5 @@
+config TESTDRIVER
+	tristate "enable test driver"
+	default m
+	help
+		This is the config for the test driver

@@ -1,0 +1,51 @@
+static int vl53l0x_probe(struct i2c_client *client)
+{
+	struct vl53l0x *vl53l0x;
+	int ret;
+
+	if (!i2c_check_functionality(client->adapter,
+				     I2C_FUNC_SMBUS_READ_I2C_BLOCK |
+				     I2C_FUNC_SMBUS_BYTE_DATA)) {
+		dev_err(&client->dev, "i2c_check_functionality error\n");
+		return -EIO;
+	}
+
+	vl53l0x = kmalloc(sizeof(*vl53l0x), GFP_KERNEL);
+	if (!vl53l0x)
+		return -ENOMEM;
+
+	/* Associate the client with our private data */
+	i2c_set_clientdata(client, vl53l0x);
+	vl53l0x->client = client;
+
+	/* Initialise to a default maximum 10 reads per second */
+	vl53l0x->rate = 10;
+
+	/*
+	 * A 'proximity' framework should be responsible for creating the class.
+	 * We do not have such a framework, so we create the class ourselves.
+	 */
+	proximity.class = class_create(???);
+	if (IS_ERR(proximity.class))
+		return PTR_ERR(proximity.class);
+
+	ret = register_chrdev(???);
+	if (ret < 0)
+		return ret;
+
+	/* Successfully registered */
+	proximity.major = ret;
+
+	printk(KERN_INFO "Proximity class created with major number %d.\n", proximity.major);
+
+	/* Create only a single proximity device with minor 0. */
+	vl53l0x->minor = 0;
+
+	/* Create the device file for userspace to interact with. */
+	vl53l0x->dev = device_create(???);
+
+	/* Register the device in the proximity device list. */
+	REGISTER_PROXIMITY(vl53l0x->minor, vl53l0x);
+
+	return 0;
+}

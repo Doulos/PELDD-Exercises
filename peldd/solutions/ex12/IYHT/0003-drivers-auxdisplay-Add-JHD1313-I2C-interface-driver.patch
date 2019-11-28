@@ -1,0 +1,194 @@
+From 7b60b539e7102e4be4e81c07e7eeeda89bc9571f Mon Sep 17 00:00:00 2001
+From: Kieran Bingham <kbingham@kernel.org>
+Date: Tue, 3 Sep 2019 15:37:07 +0100
+Subject: [PATCH 3/3] drivers: auxdisplay: Add JHD1313 I2C interface driver
+
+Provide an auxdisplay driver for the JHD1313 as used by the Grove-LCD
+RGB Backlight module [0]. A datasheet for the JHD1214 is provided by
+seeed [1], which assumes that they are similar parts.
+
+The backlight for the Grove-LCD is already controllable with the PCA963x
+driver.
+
+[0] http://wiki.seeedstudio.com/Grove-LCD_RGB_Backlight/
+[1] https://seeeddoc.github.io/Grove-LCD_RGB_Backlight/res/JHD1214Y_YG_1.0.pdf
+
+Signed-off-by: Simon Goda <simon.goda@doulos.com>
+Signed-off-by: Kieran Bingham <kbingham@kernel.org>
+---
+ MAINTAINERS                  |   4 ++
+ drivers/auxdisplay/Kconfig   |  12 ++++
+ drivers/auxdisplay/Makefile  |   1 +
+ drivers/auxdisplay/jhd1313.c | 111 +++++++++++++++++++++++++++++++++++
+ 4 files changed, 128 insertions(+)
+ create mode 100644 drivers/auxdisplay/jhd1313.c
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 8f075b866aaf..640f099ff7fb 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -8837,6 +8837,10 @@ S:	Maintained
+ F:	Documentation/admin-guide/jfs.rst
+ F:	fs/jfs/
+ 
++JHD1313 LCD Dispaly driver
++M:	Kieran Bingham <kbingham@kernel.org>
++F:	drivers/auxdisplay/jhd1313.c
++
+ JME NETWORK DRIVER
+ M:	Guo-Fu Tseng <cooldavid@cooldavid.org>
+ L:	netdev@vger.kernel.org
+diff --git a/drivers/auxdisplay/Kconfig b/drivers/auxdisplay/Kconfig
+index b8313a04422d..cfc61c1abdee 100644
+--- a/drivers/auxdisplay/Kconfig
++++ b/drivers/auxdisplay/Kconfig
+@@ -27,6 +27,18 @@ config HD44780
+ 	  kernel and started at boot.
+ 	  If you don't understand what all this is about, say N.
+ 
++config JHD1313
++	tristate "JHD1313 Character LCD support"
++	depends on I2C
++	select CHARLCD
++	---help---
++	  Enable support for Character LCDs using a JHD1313 controller on I2C.
++	  The LCD is accessible through the /dev/lcd char device (10, 156).
++	  This code can either be compiled as a module, or linked into the
++	  kernel and started at boot.
++	  This supports the LCD panel on the Grove 16x2 LCD series.
++	  If you don't understand what all this is about, say N.
++
+ config KS0108
+ 	tristate "KS0108 LCD Controller"
+ 	depends on PARPORT_PC
+diff --git a/drivers/auxdisplay/Makefile b/drivers/auxdisplay/Makefile
+index cf54b5efb07e..6e1405a61925 100644
+--- a/drivers/auxdisplay/Makefile
++++ b/drivers/auxdisplay/Makefile
+@@ -9,5 +9,6 @@ obj-$(CONFIG_KS0108)		+= ks0108.o
+ obj-$(CONFIG_CFAG12864B)	+= cfag12864b.o cfag12864bfb.o
+ obj-$(CONFIG_IMG_ASCII_LCD)	+= img-ascii-lcd.o
+ obj-$(CONFIG_HD44780)		+= hd44780.o
++obj-$(CONFIG_JHD1313)		+= jhd1313.o
+ obj-$(CONFIG_HT16K33)		+= ht16k33.o
+ obj-$(CONFIG_PARPORT_PANEL)	+= panel.o
+diff --git a/drivers/auxdisplay/jhd1313.c b/drivers/auxdisplay/jhd1313.c
+new file mode 100644
+index 000000000000..abf270e128ac
+--- /dev/null
++++ b/drivers/auxdisplay/jhd1313.c
+@@ -0,0 +1,111 @@
++// SPDX-License-Identifier: GPL-2.0+
++
++/*
++ * JHD1313 I2C Character LCD driver for Linux.
++ *
++ * Kieran Bingham <kbingham@kernel.org>
++ */
++
++#include <linux/module.h>
++#include <linux/mod_devicetable.h>
++
++#include <linux/i2c.h>
++
++#include "charlcd.h"
++
++struct jhd1313 {
++	struct i2c_client *client;
++};
++
++static void jhd1313_write_cmd(struct charlcd *lcd, int cmd)
++{
++	struct jhd1313 *jhd = lcd->drvdata;
++	struct i2c_client *client = jhd->client;
++
++	i2c_smbus_write_byte_data(client, 0x00, cmd);
++}
++
++static void jhd1313_write_data(struct charlcd *lcd, int data)
++{
++	struct jhd1313 *jhd = lcd->drvdata;
++	struct i2c_client *client = jhd->client;
++
++	i2c_smbus_write_byte_data(client, 0x40, data);
++}
++
++static const struct charlcd_ops jhd1313_ops = {
++	.write_cmd	= jhd1313_write_cmd,
++	.write_data	= jhd1313_write_data,
++};
++
++static int jhd1313_probe(struct i2c_client *client)
++{
++	struct charlcd *lcd;
++	struct jhd1313 *jhd;
++	int ret;
++
++	if (!i2c_check_functionality(client->adapter,
++				     I2C_FUNC_SMBUS_WRITE_BYTE_DATA)) {
++		dev_err(&client->dev, "i2c_check_functionality error\n");
++		return -EIO;
++	}
++
++	lcd = charlcd_alloc(sizeof(struct jhd1313));
++	if (!lcd)
++		return -ENOMEM;
++
++	jhd = lcd->drvdata;
++	i2c_set_clientdata(client, lcd);
++	jhd->client = client;
++
++	lcd->width = 16;
++	lcd->height = 2;
++	lcd->ifwidth = 8;
++	lcd->ops = &jhd1313_ops;
++
++	ret = charlcd_register(lcd);
++	if (ret) {
++		charlcd_free(lcd);
++		dev_err(&client->dev, "Failed to register JHD1313");
++	}
++
++	return ret;
++}
++
++static int jhd1313_remove(struct i2c_client *client)
++{
++	struct charlcd *lcd = i2c_get_clientdata(client);
++
++	charlcd_unregister(lcd);
++	charlcd_free(lcd);
++
++	return 0;
++}
++
++static const struct i2c_device_id jhd1313_id[] = {
++	{ "jhd1313", 0 },
++	{ },
++};
++MODULE_DEVICE_TABLE(i2c, jhd1313_id);
++
++static const struct of_device_id jhd1313_of_table[] = {
++	{ .compatible = "jhd,jhd1313" },
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(of, jhd1313_of_table);
++
++static struct i2c_driver jhd1313_driver = {
++	.driver = {
++		.name = "jhd1313",
++		.of_match_table = jhd1313_of_table,
++	},
++	.probe_new = jhd1313_probe,
++	.remove = jhd1313_remove,
++	.id_table = jhd1313_id,
++};
++
++module_i2c_driver(jhd1313_driver);
++
++MODULE_DESCRIPTION("JHD1313 I2C Character LCD driver");
++MODULE_AUTHOR("Kieran Bingham <kbingham@kernel.org>");
++MODULE_LICENSE("GPL");
+-- 
+2.20.1
+

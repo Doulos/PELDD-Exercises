@@ -1,0 +1,28 @@
+static long vl53l0x_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+{
+	struct vl53l0x *data = file->private_data;
+	int value = 0;
+
+	switch(cmd) {
+	case VL_IOC_SET_RATE:
+		if (copy_???_user(&value ,(int32_t*) arg, sizeof(value)))
+			return -EFAULT;
+
+		dev_info(data->dev, "Setting rate at %d\n", value);
+		data->rate = value;
+
+		break;
+	case VL_IOC_GET_RATE:
+		value = data->rate;
+
+		if (copy_???_user((int32_t*) arg, &value, sizeof(value)))
+			return -EFAULT;
+
+		break;
+	default:
+		 /* ENOTTY: 25 Inappropriate ioctl for device. */
+		return -ENOTTY;
+        }
+
+        return 0;
+}

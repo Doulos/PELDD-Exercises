@@ -1,0 +1,19 @@
+jhd jhd1313 LCD Display
+-----------------------
+The jhd1313 is a 16 character by 2 line LCD display.
+
+Required properties:
+- compatible: "jhd,jhd1313"
+- #address-cells: must be 1
+- #size-cells: must be 0
+- reg: I2C client address = 0x3e
+
+Example:
+
+lcd_display: jhd1313@3e {
+		compatible = "jhd,jhd1313";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x3e>;
+;
+

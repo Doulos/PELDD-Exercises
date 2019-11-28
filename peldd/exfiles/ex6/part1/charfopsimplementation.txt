@@ -1,0 +1,37 @@
+
+/* open function implementation */
+??? vl53l0x_open(???)
+{
+	int minor = iminor(inode);
+
+	/* Identify this device, and associate the device data with the file */
+	file->private_data = PROXIMITY_DATA(minor);
+
+	/* nonseekable_open removes seek, and pread()/pwrite() permissions */
+	return nonseekable_open(inode, file);
+}
+
+/* read function implementation */
+??? vl53l0x_read(???)
+{
+	struct vl53l0x *data = file->private_data;
+	int ret, val;
+	char str[32];
+
+	ret = vl53l0x_read_proximity(data, &val);
+	if (ret)
+		return ret;
+
+	ret = snprintf(str, sizeof(str), "%d\n", val);
+
+	if (copy_to_user(buf, str, ret))
+		ret = -EFAULT;
+
+	return ret;
+}
+
+/* release function implementation */
+??? vl53l0x_release(???)
+{
+	return 0;
+}

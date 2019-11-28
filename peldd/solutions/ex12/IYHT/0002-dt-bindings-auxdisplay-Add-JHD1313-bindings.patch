@@ -1,0 +1,64 @@
+From 2c9c6cbc69c102b7cc246398f9e9d9a4dab77d55 Mon Sep 17 00:00:00 2001
+From: Kieran Bingham <kbingham@kernel.org>
+Date: Wed, 27 Nov 2019 17:41:43 +0000
+Subject: [PATCH 2/3] dt-bindings: auxdisplay: Add JHD1313 bindings
+
+The JHD1313 is used in the Grove RGB LCD controller [0] and provides
+an I2C interface to control the LCD.
+
+The implementation is based upon the datasheet for the JHD1214 [1], as
+this is the only datasheet referenced by the documentation for the Grove
+part.
+
+[0] http://wiki.seeedstudio.com/Grove-LCD_RGB_Backlight/
+[1] https://seeeddoc.github.io/Grove-LCD_RGB_Backlight/res/JHD1214Y_YG_1.0.pdf
+
+Signed-off-by: Simon Goda <simon.goda@doulos.com>
+Signed-off-by: Kieran Bingham <kbingham@kernel.org>
+---
+ .../bindings/auxdisplay/jhd,jhd1313.yaml      | 33 +++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/auxdisplay/jhd,jhd1313.yaml
+
+diff --git a/Documentation/devicetree/bindings/auxdisplay/jhd,jhd1313.yaml b/Documentation/devicetree/bindings/auxdisplay/jhd,jhd1313.yaml
+new file mode 100644
+index 000000000000..b799a91846d2
+--- /dev/null
++++ b/Documentation/devicetree/bindings/auxdisplay/jhd,jhd1313.yaml
+@@ -0,0 +1,33 @@
++# SPDX-License-Identifier: GPL-2.0
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/auxdisplay/jhd,jhd1313.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: DT bindings for the JHD1313 Character LCD Controller
++
++description:
++  The JHD1313 Character LCD Controller is used by the widely available Grove
++  LCD RGB Backlight display. This currently supports only 16x2 LCD Modules. The
++  reg property specifies the I2C address of the module, and is expected to be
++  0x3e.
++
++maintainers:
++  - Kieran Bingham <kbingham@kernel.org>
++
++properties:
++  compatible:
++    const: jhd,jhd1313
++
++  reg: true
++
++required:
++ - compatible
++ - reg
++
++examples:
++ - |
++    auxdisplay: lcd@3e {
++        compatible = "jhd,jhd1313";
++        reg = <0x3e>;
++    };
+-- 
+2.20.1
+

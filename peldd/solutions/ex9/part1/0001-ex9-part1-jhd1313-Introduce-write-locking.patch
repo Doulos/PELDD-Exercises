@@ -1,0 +1,95 @@
+From a9715dbed60697f73672a81e645cc2aa60b1874c Mon Sep 17 00:00:00 2001
+From: Kieran Bingham <kieran@linuxembedded.com>
+Date: Thu, 31 Oct 2019 15:37:01 +0000
+Subject: [PATCH] ex9: part1: jhd1313: Introduce write locking
+
+Provide a lock to stop concurrent writes corrupting single line updates. This
+uses a mutex but charlcd_write could be called in interrupt context, which
+means the use of a mutex (which can sleep) could be dangerous and cause system
+deadlock.
+
+The lockdep debug system should produce a warning if that case is generated.
+
+What could happen on the error path of charlcd_write which doesn't unlock the
+mutex?
+
+If you have time, see if you can fix the error return path.
+
+---
+ solutions/ex9/part1/jhd1313.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/solutions/ex9/part1/jhd1313.c b/solutions/ex9/part1/jhd1313.c
+index 8e92924dcf12..9cc2102c7160 100644
+--- a/solutions/ex9/part1/jhd1313.c
++++ b/solutions/ex9/part1/jhd1313.c
+@@ -68,6 +68,7 @@
+ struct charlcd {
+ 	const struct charlcd_ops *ops;
+ 	const unsigned char *char_conv;	/* Optional */
++	struct mutex lock;		/* Serialise writes to the display */
+ 
+ 	int ifwidth;			/* 4-bit or 8-bit (default) */
+ 	int height;
+@@ -298,6 +299,15 @@ static ssize_t charlcd_write(struct file *file, const char __user *buf,
+ 	const char __user *tmp = buf;
+ 	char c;
+ 
++	/* Prevent screen corruption of multiple writes.
++	 * Note that this uses a mutex, but charlcd_write can be called while
++	 * in_interrupt() is true.
++	 * Is a mutex suitable? Acceptable? If not why not, and what could be
++	 * used instead (something that doesn't sleep)
++	 */
++
++	mutex_lock(&the_charlcd->lock);
++
+ 	for (; count-- > 0; (*ppos)++, tmp++) {
+ 		if (!in_interrupt() && (((count + 1) & 0x1f) == 0))
+ 			/*
+@@ -306,12 +316,15 @@ static ssize_t charlcd_write(struct file *file, const char __user *buf,
+ 			 */
+ 			schedule();
+ 
++		/* Intentional BUG: What happens if we return here without unlocking */
+ 		if (get_user(c, tmp))
+ 			return -EFAULT;
+ 
+ 		charlcd_write_char(the_charlcd, c);
+ 	}
+ 
++	mutex_unlock(&the_charlcd->lock);
++
+ 	return tmp - buf;
+ }
+ 
+@@ -357,6 +370,8 @@ static void charlcd_puts(struct charlcd *lcd, const char *s)
+ 	const char *tmp = s;
+ 	int count = strlen(s);
+ 
++	mutex_lock(&lcd->lock);
++
+ 	for (; count-- > 0; tmp++) {
+ 		if (!in_interrupt() && (((count + 1) & 0x1f) == 0))
+ 			/*
+@@ -367,6 +382,8 @@ static void charlcd_puts(struct charlcd *lcd, const char *s)
+ 
+ 		charlcd_write_char(lcd, *tmp);
+ 	}
++
++	mutex_unlock(&lcd->lock);
+ }
+ 
+ #ifdef CONFIG_PANEL_BOOT_MESSAGE
+@@ -551,6 +568,8 @@ static int jhd1313_probe(struct i2c_client *client)
+ 	lcd->ifwidth = 8;
+ 	lcd->ops = &jhd1313_ops;
+ 
++	mutex_init(&lcd->lock);
++
+ 	ret = charlcd_register(lcd);
+ 	if (ret) {
+ 		charlcd_free(lcd);
+-- 
+2.20.1
+
