@@ -223,7 +223,7 @@ static irqreturn_t vl53l0x_irq_handler(int irq, void *dev_id)
 	ret = vl53l0x_read_proximity(data, &val);
 	if (ret == 0) {
 		/* Successful Read */
-		char str[16];
+		char str[32];
 		snprintf(str, sizeof(str), "Proximity %d mm\n", val);
 
 		dev_info(data->dev, "%s", str);

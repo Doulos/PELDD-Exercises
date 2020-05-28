@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	fd = open("/dev/proximity0", O_RDONLY);
 	f = fdopen(fd, "r");
 
-	if ((f||fd) == 0) {
+	if ((fd == 0)||(f == 0)) {
 		perror(argv[0]);
 		return -1;
 	}

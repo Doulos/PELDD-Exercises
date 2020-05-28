@@ -472,21 +472,21 @@
 							label = "blue";
 							reg = <0x0>;
 							linux,default-trigger = "none";
-							brightness = <0xff>;
+							brightness = <0x40>;
 						};
 
 						green@1 {
 							label = "green";
 							reg = <0x1>;
 							linux,default-trigger = "none";
-							brightness = <0xff>;
+							brightness = <0x40>;
 						};
 
 						red@2 {
 							label = "red";
 							reg = <0x2>;
 							linux,default-trigger = "none";
-							brightness = <0xff>;
+							brightness = <0x40>;
 						};
 
 						unused@3 {
@@ -870,7 +870,6 @@
 
 	gpio-keys {
 		compatible = "gpio-keys";
-		autorepeat;
 
 		sw4 {
 			label = "sw4";

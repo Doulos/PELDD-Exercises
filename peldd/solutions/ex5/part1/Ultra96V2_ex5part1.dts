@@ -866,7 +866,6 @@
 
 	gpio-keys {
 		compatible = "gpio-keys";
-		autorepeat;
 
 		sw4 {
 			label = "sw4";
