@@ -146,9 +146,12 @@ static ssize_t vl53l0x_read(struct file *file, char __user *buf, size_t count, l
 
 	ret = snprintf(str, sizeof(str), "%d\n", val);
 
-	if (copy_to_user(buf, str, ret))
+	if (ret>count)
+		/* inform user that buf is too small */
+		ret = -EINVAL;
+	else if (copy_to_user(buf, str, ret))
 		ret = -EFAULT;
-
+	
 	return ret;
 }
 
