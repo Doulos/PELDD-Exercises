@@ -15,5 +15,5 @@ lcd_display: jhd1313@3e {
 		#address-cells = <1>;
 		#size-cells = <0>;
 		reg = <0x3e>;
-;
+};
 
