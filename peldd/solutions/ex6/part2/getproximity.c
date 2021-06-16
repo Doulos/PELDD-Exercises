@@ -5,8 +5,8 @@
 #include <sys/ioctl.h>
 
 /* IOCTL definitions should really be in header file */
-# define VL_IOC_SET_RATE _IOW('v','s',int32_t*)
-# define VL_IOC_GET_RATE _IOR('v','g',int32_t*)
+#define VL_IOC_SET_RATE _IOW('v','s',int32_t*)
+#define VL_IOC_GET_RATE _IOR('v','g',int32_t*)
 
 
 void usage(char *name)
