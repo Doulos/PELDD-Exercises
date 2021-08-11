@@ -93,7 +93,6 @@ static int vl53l0x_probe(struct i2c_client *client)
 {
 	struct vl53l0x *vl53l0x;
 	int ret;
-	int val;
 
 	if (!i2c_check_functionality(client->adapter,
 				     I2C_FUNC_SMBUS_READ_I2C_BLOCK |
