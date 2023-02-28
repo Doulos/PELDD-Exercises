@@ -1,5 +1,5 @@
 # name of object file
-obj-m := jhd1313.o 
+obj-m := simpledeps.o testdeps.o
 
 # cross compilation env vars
 ARCH := arm64

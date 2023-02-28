@@ -72,7 +72,7 @@ struct vl53l0x {
 };
 
 /* Debugfs data */
-static struct dentry *proximity_data, *proximity_rate;
+static struct dentry *proximity_data;
 
 static int vl53l0x_read_proximity(struct vl53l0x *data,
 				  int *val)
@@ -261,7 +261,8 @@ static int vl53l0x_probe(struct i2c_client *client)
 
 	/* Setup debugfs data directory & file */
 	proximity_data = debugfs_create_dir("vl53l0x", NULL);
-	proximity_rate = debugfs_create_u32("refresh_rate", 0444, proximity_data, &vl53l0x->rate);
+	/* returns void */
+	debugfs_create_u32("refresh_rate", 0444, proximity_data, &vl53l0x->rate);
 
 	return 0;
 }

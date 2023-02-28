@@ -6,7 +6,7 @@ ARCH := arm64
 CROSS_COMPILE := aarch64-linux-gnu-
 
 # Set KDIR to kernel source dir
-KDIR := /home/builduser/linux-5.3.1/
+KDIR := /home/builduser/linux-$(KERNEL_VERSION)/
 PWD := $(shell pwd)
 ccflags-y += -Wno-date-time
 

@@ -3,7 +3,7 @@ obj-m += jhd1313.o
 
 
 # Set KDIR to kernel source dir
-KDIR := /home/builduser/linux-5.3.1
+KDIR := /home/builduser/linux-$(KERNEL_VERSION)
 PWD := $(shell pwd)
 
 #set ARCH to appropriate architecture
