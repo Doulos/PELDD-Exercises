@@ -26,7 +26,7 @@
 
 #include <linux/ioctl.h>
 
-extern int charlcd_printstr(const char *s);
+extern void charlcd_printstr(const char *s);
 
 #define VL_IOC_SET_RATE _IOW('v','s',int32_t*)
 #define VL_IOC_GET_RATE _IOR('v','g',int32_t*)
