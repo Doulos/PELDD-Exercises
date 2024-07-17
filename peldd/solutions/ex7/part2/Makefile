@@ -2,7 +2,7 @@ obj-m += jhd1313/
 obj-m += vl53l0x/
 
 # Set KDIR to kernel source dir
-KDIR := /home/builduser/linux-$(KERNEL_VERSION)
+KDIR := /home/embedded/linux-$(KERNEL_VERSION)
 PWD := $(shell pwd)
 
 #set ARCH to appropriate architecture
