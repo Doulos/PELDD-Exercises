@@ -543,6 +543,9 @@ static void charlcd_free(struct charlcd *lcd)
 {
 	struct charlcd_msg *msg;
 
+	/* Cancel workqueue */
+	cancel_work_sync(&lcd->work_data.work);
+
 	/* Iterate through every member of list */
 	list_for_each_entry(msg, &lcd->list, list) {
 		printk("Msg Len %d : %s\n", msg->length, msg->message);
