@@ -21,8 +21,7 @@ static ssize_t miscmem_read(struct file *file, char __user *buf, size_t count, l
         pr_info("read /dev/miscmem to trigger memory allocation of size %ld bytes\n", size);
 
 	/* Allocate 'size' bytes here */
-	kptr = kmalloc(size, GFP_KERNEL);
-/*	kptr = vmalloc(size);*/
+
 	if (!kptr)
 		return -ENOMEM;
 
