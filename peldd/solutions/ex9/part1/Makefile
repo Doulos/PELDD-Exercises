@@ -10,7 +10,7 @@ PWD := $(shell pwd)
 ARCH := arm64
 
 #set CROSS_COMPILE to cross compiler prefix for toolchain
-CROSS_COMPILE := aarch64-linux-gnu-
+CROSS_COMPILE := aarch64-poky-linux-
 
 all:
 	make ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) \
